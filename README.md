@@ -48,6 +48,61 @@ Exercise Files/
 - `find_users.sh` - User search and listing utility
 - `startup.sh` - System startup script
 
+## Project: Real-Time Security Log Triage
+
+This project is centered around a highly efficient Bash script, `security-audit.sh`, designed to quickly scan massive web access logs and flag critical, high-priority security events. It serves as a demonstration of advanced text processing using command-line utilities (`awk`, `grep`) to perform surgical data extraction and counting.
+
+### 🔑 Key Features & Core Logic
+
+| Feature | Tool Used | Description |
+|---------|-----------|-------------|
+| Rapid Filtering | `awk` | Reads the log file once, filtering out all non-security-related lines to maximize speed. |
+| Logic Tagging | `awk` | Tags relevant lines with clear security indicators (AUTH_FAIL, HIGH_RISK_UA) before counting. |
+| Precise Counting | `grep -c` | Provides an instant, accurate count of total critical events for quick reporting. |
+| Non-Destructive | N/A | The script reads the original log file but does not modify it. |
+
+### 🚨 The Problem I Solved
+
+During a recent review of our web infrastructure, our team lacked a quick, automated way to monitor key security indicators within massive access logs. Manually searching for these events was impossible due to log volume.
+
+The goal was simple: Instantly identify and count two critical, non-negotiable security events:
+- **Unauthorized Access Attempts** (HTTP Status Code 401)
+- **Traffic from a highly vulnerable User Agent** (specifically Firefox/45.0)
+
+### 🛠️ The Solution: The Command Pipeline
+
+A simple but powerful pipeline handles this logic:
+
+```bash
+awk '
+  /Firefox\/45\.0/ { print "HIGH_RISK_UA: " $0 }
+  $9 == 401 { print "AUTH_FAIL: " $0 }' "$1" | grep -c -E 'HIGH_RISK_UA|AUTH_FAIL'
+```
+
+This single line processes the entire log file, tags the critical lines, and then pipes the result to `grep` for a final, instantaneous count.
+
+### ⚙️ Usage
+
+**Prerequisites:**
+- A Linux environment (Bash shell) with standard utilities (`awk`, `grep`)
+
+**Grant Execution Permission:**
+```bash
+chmod +x security-audit.sh
+```
+
+**Execute the Script:**
+```bash
+./security-audit.sh access.log
+```
+
+**Example Output:**
+```
+--- Security Audit Report for access.log ---
+3
+-------------------------------------
+```
+
 ## Getting Started
 
 1. Clone this repository
